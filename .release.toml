@@ -1,0 +1,36 @@
+# cargo-release configuration for Spectre
+# See https://github.com/crate-ci/cargo-release for configuration options
+
+# Tag configuration
+tag-prefix = "v"
+tag-name = "{{prefix}}{{version}}"
+
+# Disable built-in publish and push - let CI handle it
+push = false
+publish = false
+tag = false
+
+# Only allow releases from main branch
+allow-branch = ["main"]
+
+# Enable all features during release
+enable-all-features = true
+
+# Version metadata
+pre-release-replacements = [
+  # Update pyproject.toml version
+  {file = "pyproject.toml", search = 'version = ".*"', replace = "version = \"{{version}}\"", exactly = 1},
+  # Update CHANGELOG.md - add new version section
+  {file = "CHANGELOG.md", search = "## \\[Unreleased\\]", replace = "## [Unreleased]\n\n### Added\n- Placeholder for upcoming features\n\n## [{{version}}] - {{date}}", exactly = 1},
+  # Update CHANGELOG.md - add comparison link for new version
+  {file = "CHANGELOG.md", search = "\\[Unreleased\\]: .*", replace = "[Unreleased]: https://github.com/inav/spectre/compare/v{{version}}...HEAD\n[{{version}}]: https://github.com/inav/spectre/compare/v{{prev_version}}...v{{version}}", exactly = 1},
+]
+
+# Pre-release hooks
+pre-release-hook = ["scripts/sync-version.py", "--verify"]
+
+# Don't verify commits (we'll use conventional commits but not enforce via cargo-release)
+verify = false
+
+# Ensure workspace version is consistent
+conservative = false

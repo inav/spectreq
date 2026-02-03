@@ -1,0 +1,100 @@
+[package]
+name = "spectreq"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.93.0"
+authors = ["Spectre Contributors"]
+license = "MIT OR Apache-2.0"
+description = "High-efficiency HTTP client with browser impersonation"
+repository = "https://github.com/inav/spectreq"
+keywords = ["http", "client", "browser", "fingerprinting"]
+categories = ["web-programming::http-client"]
+
+[features]
+default = []
+post-quantum = ["rustls-post-quantum"]
+ech = ["reqwest"]
+http3 = ["quinn", "h3", "h3-quinn"]
+
+[dependencies]
+# Core dependencies
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+rustls = { version = "0.23", features = ["ring"] }
+rustls-native-certs = "0.8"
+socket2 = { version = "0.5", features = ["all"] }
+thiserror = "2.0"
+anyhow = "1.0"
+bytes = "1.10"
+tracing = "0.1"
+
+# HTTP client dependencies
+tokio = { version = "1.49", features = ["full"] }
+hyper = { version = "1.8", features = ["full"] }
+hyper-util = { version = "0.1", features = ["full", "tokio"] }
+http-body-util = "0.1"
+h2 = "0.4"
+tower = "0.5"
+http = "1.2"
+tower-service = "0.3"
+futures-util = "0.3"
+url = "2.5"
+tokio-rustls = "0.26"
+base64 = "0.22"
+
+# Headers ordering
+indexmap = { version = "2.7", features = ["serde"] }
+
+# JA4 fingerprinting
+sha2 = "0.10"
+hex = "0.4"
+
+# Auth (Digest MD5)
+md-5 = "0.10"
+
+# SOCKS5
+socks = "0.3"
+
+# Compression
+brotli = "8.0"
+flate2 = "1.1"
+zstd = "0.13"
+cookie_store = "0.22"
+
+# Post-quantum TLS (optional)
+rustls-post-quantum = { version = "0.2", optional = true }
+
+# ECH support (optional)
+reqwest = { version = "0.12", default-features = false, features = ["json"], optional = true }
+
+# HTTP/3 support (optional)
+quinn = { version = "0.11", optional = true }
+h3 = { version = "0.0", optional = true }
+h3-quinn = { version = "0.0", optional = true }
+
+# Additional dependencies
+der = "0.7"
+x509-cert = "0.2"
+serde_yaml = "0.9"
+rand = "0.9"
+chacha20poly1305 = "0.10"
+argon2 = "0.5"
+
+[dev-dependencies]
+tokio = { version = "1.49", features = ["full", "test-util"] }
+proptest = "1.5"
+criterion = { version = "0.5", features = ["html_reports"] }
+tempfile = "3.10"
+
+[[bench]]
+name = "client_bench"
+harness = false
+
+[[bench]]
+name = "profile_bench"
+harness = false
+
+[lib]
+name = "spectreq"
+crate-type = ["lib"]
+

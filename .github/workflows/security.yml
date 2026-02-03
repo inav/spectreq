@@ -1,0 +1,114 @@
+name: Security
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"  # Weekly on Monday at 6 AM UTC
+  push:
+    branches: [main]
+    paths:
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "spectreq-py/Cargo.toml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "spectreq-py/Cargo.toml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # ============================================================================
+  # Dependency Audit
+  # ============================================================================
+  audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+
+      - name: Run security audit
+        run: cargo audit
+
+  # ============================================================================
+  # Dependency License Check
+  # ============================================================================
+  deny:
+    name: Dependency Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cargo-deny
+        run: cargo install cargo-deny
+
+      - name: Check dependencies
+        run: cargo deny check || true  # Soft fail until deny.toml is configured
+        continue-on-error: true
+
+  # ============================================================================
+  # SAST - Static Analysis
+  # ============================================================================
+  semgrep:
+    name: Semgrep SAST
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Semgrep
+        run: semgrep ci --sarif --output=semgrep.sarif
+        env:
+          SEMGREP_RULES: p/rust p/security-audit p/secrets
+        continue-on-error: true
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep.sarif
+        if: always()
+        continue-on-error: true
+
+  # ============================================================================
+  # Dependency Tree Analysis
+  # ============================================================================
+  supply-chain:
+    name: Supply Chain Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Check for yanked crates
+        run: |
+          cargo update 2>&1 | tee update_output.txt
+          if grep -q "yanked" update_output.txt; then
+            echo "::warning::Some dependencies have been yanked"
+          fi
+
+      - name: Check for duplicates
+        run: |
+          cargo tree --duplicates || echo "No duplicate dependencies"

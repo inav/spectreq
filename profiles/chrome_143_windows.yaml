@@ -1,0 +1,59 @@
+# Chrome 143 Windows Profile
+# This is a sample profile that can be loaded with Profile::from_yaml_file()
+
+browser: Chrome
+os: Windows
+version: "143.0.0.0"
+user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+
+http2:
+  initial_window_size: 6291456
+  max_concurrent_streams: 256
+  max_frame_size: 16384
+  header_table_size: 65536
+  enable_push: false
+
+tls:
+  cipher_suites:
+    - TLS_AES_128_GCM_SHA256
+    - TLS_AES_256_GCM_SHA384
+    - TLS_CHACHA20_POLY1305_SHA256
+  extensions:
+    - server_name
+    - status_request
+    - supported_groups
+    - ec_point_formats
+    - signature_algorithms
+    - application_layer_protocol_negotiation
+    - key_share
+  grease: true
+  min_version: "1.2"
+  max_version: "1.3"
+  alpn:
+    - h2
+    - http/1.1
+
+tcp:
+  ttl: 128
+  sack: true
+  keepalive: false
+
+accept_encoding: "gzip, deflate, br, zstd"
+
+headers: {}
+header_order: {}
+request_context:
+  destination: document
+  mode: navigate
+  site: none
+  user: true
+client_hints:
+  ua: "\"Chromium\";v=\"143\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"143\""
+  full_version: "143.0.0.0"
+  platform: "Windows"
+  platform_version: "15.0.0"
+  architecture: "x86"
+  bitness: "64"
+  mobile: false
+  model: ""
+session_seed: 0
