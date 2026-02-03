@@ -3,7 +3,7 @@
 //! This module provides Python bindings for authentication helpers.
 
 use pyo3::prelude::*;
-use spectreq::{BearerToken, BasicAuth, DigestAuth};
+use spectreq::{BasicAuth, BearerToken, DigestAuth};
 use std::time::Duration;
 
 /// Python wrapper for Bearer Token
@@ -148,6 +148,7 @@ impl PyDigestAuth {
 
     /// Generate the authorization header for a request
     #[pyo3(signature = (method, uri, realm, nonce, qop=None, opaque=None, nc=1))]
+    #[allow(clippy::too_many_arguments)]
     fn authorization_header(
         &self,
         method: &str,
@@ -158,7 +159,8 @@ impl PyDigestAuth {
         opaque: Option<&str>,
         nc: u32,
     ) -> String {
-        self.inner.authorization_header(method, uri, realm, nonce, qop, opaque, nc)
+        self.inner
+            .authorization_header(method, uri, realm, nonce, qop, opaque, nc)
     }
 
     fn __repr__(&self) -> String {

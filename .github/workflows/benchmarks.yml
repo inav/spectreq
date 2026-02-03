@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Install Rust
-        uses: dtolnay/rust-action@stable
+        uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
       
@@ -44,8 +44,8 @@ jobs:
         uses: benchmark-action/github-action-benchmark@v1
         with:
           name: Rust Benchmarks
-          tool: 'cargo'
-          output-file-path: target/criterion/*/new/estimates.json
+          tool: 'criterion'
+          output-file-path: target/criterion
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           alert-threshold: '150%'
@@ -71,7 +71,7 @@ jobs:
           fetch-depth: 0
       
       - name: Install Rust
-        uses: dtolnay/rust-action@stable
+        uses: dtolnay/rust-toolchain@stable
       
       - name: Cache cargo
         uses: actions/cache@v4

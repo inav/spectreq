@@ -38,7 +38,7 @@ pub fn build_tls_config(profile: &Profile) -> Result<ClientConfig, crate::core::
     for cert in cert_result.certs {
         root_store
             .add(cert)
-            .map_err(|e| crate::core::SpectreError::Tls(e))?;
+            .map_err(crate::core::SpectreError::Tls)?;
     }
 
     // Build TLS configuration - use post-quantum for Chrome 131+ if feature enabled
@@ -60,7 +60,7 @@ pub fn build_tls_config(profile: &Profile) -> Result<ClientConfig, crate::core::
     let config =
         ClientConfig::builder_with_provider(rustls::crypto::ring::default_provider().into())
             .with_protocol_versions(&[&TLS12, &TLS13])
-            .map_err(|e| crate::core::SpectreError::Tls(e))?
+            .map_err(crate::core::SpectreError::Tls)?
             .with_root_certificates(root_store)
             .with_no_client_auth();
 

@@ -7,37 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
+## [0.1.1] - 2026-02-03
 
+### Release Highlights
+- **Source Distribution**: Proper PyPI source distribution (sdist) for compatibility with non-manylinux environments (e.g., older glibc).
+- **Correct Metadata**: Updated repository URLs and package renaming to `spectreq`.
+
+### Added
 - **Encrypted Session Persistence**: Authenticated encryption for session files (ChaCha20-Poly1305 + Argon2)
 - **Anti-Bot Testing**: Integration tests for Cloudflare, TLS/HTTP2 fingerprinting, and random profiles
 - **Python Bindings**: Exposed `HttpResponse`, `BearerToken`, `BasicAuth`, `DigestAuth`
 - **HTTP/3**: Feature flag and stub implementation (experimental)
 - **Dynamic Profile Loading**: Load profiles from JSON/YAML files
-  - `Profile::from_json_file()` / `Profile::from_yaml_file()`
-  - `Profile::from_json()` / `Profile::from_yaml()`
-  - `Profile::to_json()` / `Profile::to_yaml()`
 - **Profile Randomization**: Anti-detection features
-  - `Profile::random()` - Random profile from all browsers
-  - `Profile::random_chrome()` - Random Chrome profile
-  - `profile.randomize()` - Randomize session-specific values
 - **Property-Based Tests**: Added proptest for comprehensive testing
 - **Benchmarks**: Added criterion benchmarks for performance tracking
 - **Sample Profiles**: Added `profiles/chrome_143_windows.yaml`
 - **Documentation**: Added ARCHITECTURE.md and SECURITY.md
 
 ### Changed
-
 - Authentication: Replace placeholder MD5 implementation with proper `md-5` crate
 - Authentication: NTLM now explicitly marked as unimplemented with documentation
 - TLS: Post-quantum support now properly uses `rustls-post-quantum` provider
 - Error types: Added `Config` error variant for profile loading errors
 
 ### Fixed
-
 - TLS fingerprint validation tests now properly check JA4 format
+- PyPI release missing sdist
 
-## [0.1.0] - 2026-02-02
+## [0.1.0] - 2026-02-02 (Retracted/Yanked)
+- Initial release effort (missing sdist).
 
 ### Added
 

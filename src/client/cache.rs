@@ -43,12 +43,12 @@ impl CacheEntry {
         if let Some(max_age) = self.max_age {
             self.cached_at
                 .elapsed()
-                .map_or(false, |elapsed| elapsed < max_age)
+                .is_ok_and(|elapsed| elapsed < max_age)
         } else {
             // Default cache time: 5 minutes
             self.cached_at
                 .elapsed()
-                .map_or(false, |elapsed| elapsed < Duration::from_secs(300))
+                .is_ok_and(|elapsed| elapsed < Duration::from_secs(300))
         }
     }
 
@@ -64,8 +64,8 @@ impl CacheEntry {
             cc.split(',')
                 .find_map(|part| {
                     let part = part.trim();
-                    if part.starts_with("max-age=") {
-                        part[8..].parse().ok()
+                    if let Some(stripped) = part.strip_prefix("max-age=") {
+                        stripped.parse().ok()
                     } else {
                         None
                     }
@@ -117,6 +117,7 @@ impl Cache {
     }
 
     /// Put a cache entry
+    #[allow(clippy::too_many_arguments)]
     pub fn put(
         &self,
         url: &str,

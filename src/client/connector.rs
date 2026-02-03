@@ -1,8 +1,8 @@
+use crate::core::{build_tls_config, create_tcp_socket, Profile, SpectreError};
 use http::uri::Scheme;
 use hyper::rt::{Read as HyperRead, Write as HyperWrite};
 use hyper::Uri;
 use hyper_util::client::legacy::connect::{Connected, Connection};
-use crate::core::{build_tls_config, create_tcp_socket, Profile, SpectreError};
 use std::future::Future;
 use std::io;
 use std::pin::Pin;
@@ -24,7 +24,7 @@ fn parse_proxy_url(url: &str) -> Option<(String, u16)> {
 /// Custom stream type that can be either a plain TCP stream or a TLS stream
 pub enum MaybeTlsStream {
     Plain(TcpStream),
-    Tls(tokio_rustls::client::TlsStream<TcpStream>),
+    Tls(Box<tokio_rustls::client::TlsStream<TcpStream>>),
 }
 
 impl AsyncRead for MaybeTlsStream {
@@ -82,7 +82,7 @@ impl ImpersonateConnection {
     }
 
     pub fn tls(stream: tokio_rustls::client::TlsStream<TcpStream>) -> Self {
-        Self::new(MaybeTlsStream::Tls(stream))
+        Self::new(MaybeTlsStream::Tls(Box::new(stream)))
     }
 }
 

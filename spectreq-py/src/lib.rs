@@ -10,8 +10,8 @@ mod client;
 mod cookies;
 mod profile;
 
-use auth::{PyBearerToken, PyBasicAuth, PyDigestAuth};
-use client::{PyClient, PyResponse, PyRequestTiming};
+use auth::{PyBasicAuth, PyBearerToken, PyDigestAuth};
+use client::{PyClient, PyRequestTiming, PyResponse};
 use cookies::PyCookieJar;
 use profile::PyProfile;
 
@@ -42,11 +42,11 @@ fn spectreq(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyResponse>()?;
     m.add_class::<PyRequestTiming>()?;
     m.add_class::<PyCookieJar>()?;
-    
+
     // Authentication
     m.add_class::<PyBearerToken>()?;
     m.add_class::<PyBasicAuth>()?;
     m.add_class::<PyDigestAuth>()?;
-    
+
     Ok(())
 }

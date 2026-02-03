@@ -9,10 +9,10 @@
 //! - Rate limiting
 //! - And more...
 
+use crate::core::SpectreError;
 use bytes::Bytes;
 use http_body_util::Full;
 use hyper::{Method, Request};
-use crate::core::SpectreError;
 use std::sync::{Arc, RwLock};
 
 /// Request information for pre-request hooks

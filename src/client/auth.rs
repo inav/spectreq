@@ -280,6 +280,7 @@ impl DigestAuth {
     }
 
     /// Create the authorization header value for digest auth
+    #[allow(clippy::too_many_arguments)]
     pub fn authorization_header(
         &self,
         method: &str,
@@ -389,13 +390,13 @@ impl NtlmAuth {
     }
 
     /// Get the NTLM message type 1 (negotiate)
-    /// 
+    ///
     /// # Panics
-    /// 
+    ///
     /// NTLM authentication is not yet implemented. This method exists for API
     /// completeness but will panic if called. For enterprise Windows authentication,
     /// consider using Kerberos/SPNEGO instead, or contribute an NTLM implementation.
-    /// 
+    ///
     /// NTLM implementation requires:
     /// - Type 1 (Negotiate) message generation
     /// - Type 2 (Challenge) message parsing

@@ -161,7 +161,7 @@ impl Middleware for RateLimiter {
         if !self
             .requests
             .try_read()
-            .map_or(false, |r| r.len() < self.max_requests)
+            .is_ok_and(|r| r.len() < self.max_requests)
         {
             return Err(SpectreError::Http("Rate limit exceeded".to_string()));
         }
@@ -505,6 +505,7 @@ impl MiddlewareChainBuilder {
     }
 
     /// Add a middleware to the chain
+    #[allow(clippy::should_implement_trait)]
     pub fn add(mut self, middleware: Arc<dyn Middleware>) -> Self {
         self.chain.add_middleware(middleware);
         self

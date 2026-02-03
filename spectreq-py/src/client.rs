@@ -11,8 +11,8 @@ use spectreq::Profile;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use spectreq::client::RequestTiming;
 use crate::cookies::PyCookieJar;
+use spectreq::client::RequestTiming;
 
 /// Request timing metrics
 #[pyclass(name = "RequestTiming")]
@@ -107,6 +107,7 @@ impl PyResponse {
 
     /// Check if response was from cache
     #[getter]
+    #[allow(clippy::wrong_self_convention)]
     fn from_cache(&self) -> bool {
         self.from_cache
     }

@@ -106,7 +106,7 @@ impl Socks5Connector {
 
         // Build greeting
         let num_methods = if self.config.has_auth() { 2 } else { 1 };
-        let greeting = vec![
+        let greeting = [
             0x05,        // SOCKS version
             num_methods, // Number of methods
             0x00,        // No authentication
@@ -309,10 +309,7 @@ impl Socks5Connector {
                 return Err(io::Error::new(io::ErrorKind::TimedOut, "TTL expired"));
             }
             0x07 => {
-                return Err(io::Error::new(
-                    io::ErrorKind::Other,
-                    "Command not supported",
-                ));
+                return Err(io::Error::other("Command not supported"));
             }
             0x08 => {
                 return Err(io::Error::new(
@@ -321,10 +318,10 @@ impl Socks5Connector {
                 ));
             }
             _ => {
-                return Err(io::Error::new(
-                    io::ErrorKind::Other,
-                    format!("Unknown SOCKS error code: {}", response[1]),
-                ));
+                return Err(io::Error::other(format!(
+                    "Unknown SOCKS error code: {}",
+                    response[1]
+                )));
             }
         }
 

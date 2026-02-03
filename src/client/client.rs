@@ -41,12 +41,12 @@ use crate::client::cache::Cache;
 use crate::client::compression::Decompress;
 use crate::client::connector::ImpersonateConnector;
 use crate::client::cookies::CookieJar;
+use crate::core::{Headers, Profile, Result, SpectreError};
 use bytes::Bytes;
 use http_body_util::{BodyExt, Full};
 use hyper::{Method, Request};
 use hyper_util::client::legacy::{Client as HyperClient, Error as HyperLegacyError};
 use hyper_util::rt::TokioExecutor;
-use crate::core::{Headers, Profile, Result, SpectreError};
 use std::time::Duration;
 use url::Url;
 
@@ -723,7 +723,7 @@ impl Client {
             .request(req)
             .await
             .map_err(convert_hyper_error)?;
-        
+
         let ttfb = start_time.elapsed();
 
         // Extract headers before moving resp
@@ -769,7 +769,7 @@ impl Client {
                     total: start_time.elapsed(),
                     ..RequestTiming::default()
                 };
-                
+
                 return Ok(HttpResponse {
                     status,
                     headers,
@@ -814,7 +814,7 @@ impl Client {
         if !set_cookies.is_empty() {
             self.cookie_jar.set_cookies(&set_cookies, &url_obj);
         }
-        
+
         let total = start_time.elapsed();
         let timing = RequestTiming {
             ttfb,
@@ -1262,9 +1262,7 @@ impl ClientBuilder {
     ///
     /// Returns an error if the profile is invalid.
     pub async fn build(self) -> Result<Client> {
-        let profile = self
-            .profile
-            .unwrap_or_else(|| Profile::chrome_120_windows());
+        let profile = self.profile.unwrap_or_else(Profile::chrome_120_windows);
         let mut client = Client::with_options(profile, self.proxy, self.headers).await?;
         // Set split proxy configuration
         client.tcp_proxy = self.tcp_proxy;
