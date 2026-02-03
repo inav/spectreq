@@ -2,7 +2,7 @@
 //!
 //! Tests for profile creation, properties, and TLS fingerprinting.
 
-use spectreq::{Profile, BrowserName, OS};
+use spectreq::{BrowserName, Profile, OS};
 
 #[test]
 fn test_chrome_120_windows_profile() {
@@ -112,7 +112,7 @@ fn test_tls_cipher_suites_populated() {
     let chrome = Profile::chrome_143_windows();
     let firefox = Profile::firefox_121_windows();
     let safari = Profile::safari_17_macos();
-    
+
     // All profiles should have cipher suites
     assert!(!chrome.tls.cipher_suites.is_empty());
     assert!(!firefox.tls.cipher_suites.is_empty());
@@ -129,7 +129,7 @@ fn test_tls_extensions_populated() {
 fn test_http2_settings() {
     let chrome = Profile::chrome_120_windows();
     let firefox = Profile::firefox_121_windows();
-    
+
     // Chrome and Firefox have different HTTP/2 settings
     assert!(chrome.http2.initial_window_size > 0);
     assert!(firefox.http2.initial_window_size > 0);
@@ -141,7 +141,7 @@ fn test_http2_settings() {
 fn test_tcp_settings() {
     let windows_profile = Profile::chrome_143_windows();
     let linux_profile = Profile::chrome_143_linux();
-    
+
     // TCP TTL should be set appropriately for OS
     // Windows typically uses TTL 128, Linux uses 64
     assert!(windows_profile.tcp.ttl.is_some());
@@ -155,15 +155,17 @@ fn test_alpn_populated() {
     let profile = Profile::chrome_143_windows();
     assert!(!profile.tls.alpn.is_empty());
     // Should contain at least h2 and http/1.1
-    assert!(profile.tls.alpn.contains(&"h2".to_string()) || 
-            profile.tls.alpn.contains(&"http/1.1".to_string()));
+    assert!(
+        profile.tls.alpn.contains(&"h2".to_string())
+            || profile.tls.alpn.contains(&"http/1.1".to_string())
+    );
 }
 
 #[test]
 fn test_grease_settings() {
     let chrome = Profile::chrome_143_windows();
     let firefox = Profile::firefox_121_windows();
-    
+
     // Chrome uses GREASE, Firefox doesn't
     assert!(chrome.tls.grease);
     assert!(!firefox.tls.grease);
@@ -172,12 +174,11 @@ fn test_grease_settings() {
 #[test]
 fn test_accept_encoding() {
     let profile = Profile::chrome_143_windows();
-    
+
     // Should support multiple compression types (it's a string like "gzip, deflate, br, zstd")
     assert!(!profile.accept_encoding.is_empty());
     // Modern browsers support br (Brotli)
-    assert!(profile.accept_encoding.contains("br") ||
-            profile.accept_encoding.contains("gzip"));
+    assert!(profile.accept_encoding.contains("br") || profile.accept_encoding.contains("gzip"));
 }
 
 #[test]
@@ -198,12 +199,24 @@ fn test_all_profiles_have_required_fields() {
         Profile::safari_17_macos(),
         Profile::edge_120_windows(),
     ];
-    
+
     for profile in profiles {
         assert!(!profile.version.is_empty(), "Version should not be empty");
-        assert!(!profile.user_agent.is_empty(), "User-Agent should not be empty");
-        assert!(!profile.tls.cipher_suites.is_empty(), "Cipher suites should not be empty");
-        assert!(profile.http2.initial_window_size > 0, "Initial window size should be > 0");
-        assert!(profile.tcp.ttl.is_some() && profile.tcp.ttl.unwrap() > 0, "TCP TTL should be > 0");
+        assert!(
+            !profile.user_agent.is_empty(),
+            "User-Agent should not be empty"
+        );
+        assert!(
+            !profile.tls.cipher_suites.is_empty(),
+            "Cipher suites should not be empty"
+        );
+        assert!(
+            profile.http2.initial_window_size > 0,
+            "Initial window size should be > 0"
+        );
+        assert!(
+            profile.tcp.ttl.is_some() && profile.tcp.ttl.unwrap() > 0,
+            "TCP TTL should be > 0"
+        );
     }
 }

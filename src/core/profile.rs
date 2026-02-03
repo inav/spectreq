@@ -43,7 +43,9 @@
 //! }
 //! ```
 
-use crate::core::headers::{generate_sec_fetch_headers, ClientHints, OrderedHeaders, RequestContext};
+use crate::core::headers::{
+    generate_sec_fetch_headers, ClientHints, OrderedHeaders, RequestContext,
+};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt;
@@ -751,8 +753,11 @@ impl ProfileBuilder {
     pub fn version(mut self, version: impl Into<String>) -> Self {
         let version = version.into();
         // Regenerate client hints for new version
-        self.profile.client_hints =
-            crate::core::headers::generate_client_hints(self.profile.browser, self.profile.os, &version);
+        self.profile.client_hints = crate::core::headers::generate_client_hints(
+            self.profile.browser,
+            self.profile.os,
+            &version,
+        );
         self.profile.version = version;
         self
     }
@@ -933,16 +938,20 @@ impl Profile {
     ///
     /// let profile = Profile::from_json_file("profiles/chrome_143.json")?;
     /// ```
-    pub fn from_json_file(path: impl AsRef<std::path::Path>) -> Result<Self, crate::core::SpectreError> {
-        let contents = std::fs::read_to_string(path.as_ref())
-            .map_err(|e| crate::core::SpectreError::Config(format!("Failed to read profile file: {}", e)))?;
+    pub fn from_json_file(
+        path: impl AsRef<std::path::Path>,
+    ) -> Result<Self, crate::core::SpectreError> {
+        let contents = std::fs::read_to_string(path.as_ref()).map_err(|e| {
+            crate::core::SpectreError::Config(format!("Failed to read profile file: {}", e))
+        })?;
         Self::from_json(&contents)
     }
 
     /// Load a profile from a JSON string
     pub fn from_json(json: &str) -> Result<Self, crate::core::SpectreError> {
-        serde_json::from_str(json)
-            .map_err(|e| crate::core::SpectreError::Config(format!("Failed to parse profile JSON: {}", e)))
+        serde_json::from_str(json).map_err(|e| {
+            crate::core::SpectreError::Config(format!("Failed to parse profile JSON: {}", e))
+        })
     }
 
     /// Load a profile from a YAML file
@@ -954,28 +963,34 @@ impl Profile {
     ///
     /// let profile = Profile::from_yaml_file("profiles/chrome_143.yaml")?;
     /// ```
-    pub fn from_yaml_file(path: impl AsRef<std::path::Path>) -> Result<Self, crate::core::SpectreError> {
-        let contents = std::fs::read_to_string(path.as_ref())
-            .map_err(|e| crate::core::SpectreError::Config(format!("Failed to read profile file: {}", e)))?;
+    pub fn from_yaml_file(
+        path: impl AsRef<std::path::Path>,
+    ) -> Result<Self, crate::core::SpectreError> {
+        let contents = std::fs::read_to_string(path.as_ref()).map_err(|e| {
+            crate::core::SpectreError::Config(format!("Failed to read profile file: {}", e))
+        })?;
         Self::from_yaml(&contents)
     }
 
     /// Load a profile from a YAML string
     pub fn from_yaml(yaml: &str) -> Result<Self, crate::core::SpectreError> {
-        serde_yaml::from_str(yaml)
-            .map_err(|e| crate::core::SpectreError::Config(format!("Failed to parse profile YAML: {}", e)))
+        serde_yaml::from_str(yaml).map_err(|e| {
+            crate::core::SpectreError::Config(format!("Failed to parse profile YAML: {}", e))
+        })
     }
 
     /// Export profile to JSON string
     pub fn to_json(&self) -> Result<String, crate::core::SpectreError> {
-        serde_json::to_string_pretty(self)
-            .map_err(|e| crate::core::SpectreError::Config(format!("Failed to serialize profile: {}", e)))
+        serde_json::to_string_pretty(self).map_err(|e| {
+            crate::core::SpectreError::Config(format!("Failed to serialize profile: {}", e))
+        })
     }
 
     /// Export profile to YAML string
     pub fn to_yaml(&self) -> Result<String, crate::core::SpectreError> {
-        serde_yaml::to_string(self)
-            .map_err(|e| crate::core::SpectreError::Config(format!("Failed to serialize profile: {}", e)))
+        serde_yaml::to_string(self).map_err(|e| {
+            crate::core::SpectreError::Config(format!("Failed to serialize profile: {}", e))
+        })
     }
 
     /// Get a random profile from predefined list
@@ -1041,18 +1056,18 @@ impl Profile {
     pub fn randomize(mut self) -> Self {
         use rand::Rng;
         let mut rng = rand::rng();
-        
+
         // Randomize session seed for GREASE shuffling
         self.session_seed = rng.random();
-        
+
         // Slight variations in HTTP/2 settings (within normal range)
         if self.http2.initial_window_size > 65536 {
             // For Chrome 131+ with 6MB window, vary by +/- 32KB
             let delta: i32 = rng.random_range(-32768..32768);
-            self.http2.initial_window_size = 
+            self.http2.initial_window_size =
                 (self.http2.initial_window_size as i64 + delta as i64) as u32;
         }
-        
+
         self
     }
 }

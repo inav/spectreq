@@ -10,7 +10,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Initial CookieJar size: {}", client.cookie_jar().len());
 
     // Manually set cookies
-    client.cookie_jar().set_cookies(&["session=rust123"], &url_obj);
+    client
+        .cookie_jar()
+        .set_cookies(&["session=rust123"], &url_obj);
     println!("Set cookie 'session=rust123'");
 
     // Verify

@@ -8,8 +8,8 @@ use std::pin::Pin;
 use std::task::{Context, Poll};
 use tokio::io::{AsyncRead, ReadBuf};
 
-use bytes::Bytes;
 use crate::core::SpectreError;
+use bytes::Bytes;
 
 /// Streaming response for chunked reading
 pub struct StreamingResponse {

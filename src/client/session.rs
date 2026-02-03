@@ -24,8 +24,8 @@
 //! manager.load_encrypted("sessions.enc", "my_password")?;
 //! ```
 
-use serde::{Deserialize, Serialize};
 use crate::core::Profile;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufReader, BufWriter, Read, Write};
@@ -34,11 +34,11 @@ use std::time::SystemTime;
 use thiserror::Error;
 
 // Encryption imports
+use argon2::Argon2;
 use chacha20poly1305::{
     aead::{Aead, KeyInit},
     ChaCha20Poly1305, Nonce,
 };
-use argon2::Argon2;
 use rand::RngCore;
 
 /// Errors that can occur during session persistence
@@ -55,13 +55,13 @@ pub enum SessionError {
 
     #[error("File not found: {0}")]
     FileNotFound(String),
-    
+
     #[error("Encryption error: {0}")]
     Encryption(String),
-    
+
     #[error("Decryption error: invalid password or corrupted file")]
     Decryption,
-    
+
     #[error("Invalid file format")]
     InvalidFormat,
 }
@@ -287,28 +287,26 @@ impl SessionManager {
     pub fn is_empty(&self) -> bool {
         self.sessions.is_empty()
     }
-    
+
     // ========================================================================
     // Encrypted session persistence
     // ========================================================================
-    
+
     /// Derive an encryption key from a password using Argon2
     fn derive_key(password: &str, salt: &[u8; 16]) -> [u8; 32] {
         let argon2 = Argon2::default();
         let mut key = [0u8; 32];
-        
-        argon2.hash_password_into(
-            password.as_bytes(),
-            salt,
-            &mut key,
-        ).expect("Argon2 key derivation failed");
-        
+
+        argon2
+            .hash_password_into(password.as_bytes(), salt, &mut key)
+            .expect("Argon2 key derivation failed");
+
         key
     }
-    
+
     /// Save sessions to an encrypted file
     ///
-    /// Uses ChaCha20-Poly1305 for authenticated encryption with Argon2 
+    /// Uses ChaCha20-Poly1305 for authenticated encryption with Argon2
     /// for password-based key derivation.
     ///
     /// File format: [magic:4][version:1][salt:16][nonce:12][ciphertext:*]
@@ -323,32 +321,36 @@ impl SessionManager {
     /// ```rust,ignore
     /// manager.save_encrypted("sessions.enc", "my_secret_password")?;
     /// ```
-    pub fn save_encrypted<P: AsRef<Path>>(&self, path: P, password: &str) -> Result<(), SessionError> {
+    pub fn save_encrypted<P: AsRef<Path>>(
+        &self,
+        path: P,
+        password: &str,
+    ) -> Result<(), SessionError> {
         // Serialize sessions to JSON
         let json = serde_json::to_string(&self.sessions)?;
-        
+
         // Generate random salt and nonce
         let mut salt = [0u8; 16];
         let mut nonce_bytes = [0u8; 12];
         let mut rng = rand::rng();
         rng.fill_bytes(&mut salt);
         rng.fill_bytes(&mut nonce_bytes);
-        
+
         // Derive key from password
         let key = Self::derive_key(password, &salt);
-        
+
         // Encrypt the JSON
         let cipher = ChaCha20Poly1305::new_from_slice(&key)
             .map_err(|e| SessionError::Encryption(e.to_string()))?;
         let nonce = Nonce::from_slice(&nonce_bytes);
-        
+
         let ciphertext = cipher
             .encrypt(nonce, json.as_bytes())
             .map_err(|_| SessionError::Encryption("Encryption failed".to_string()))?;
-        
+
         // Write to file
         let mut file = File::create(path)?;
-        
+
         // Magic bytes: "SPEC"
         file.write_all(b"SPEC")?;
         // Version: 1
@@ -359,10 +361,10 @@ impl SessionManager {
         file.write_all(&nonce_bytes)?;
         // Ciphertext
         file.write_all(&ciphertext)?;
-        
+
         Ok(())
     }
-    
+
     /// Load sessions from an encrypted file
     ///
     /// # Arguments
@@ -375,57 +377,62 @@ impl SessionManager {
     /// ```rust,ignore
     /// manager.load_encrypted("sessions.enc", "my_secret_password")?;
     /// ```
-    pub fn load_encrypted<P: AsRef<Path>>(&mut self, path: P, password: &str) -> Result<(), SessionError> {
+    pub fn load_encrypted<P: AsRef<Path>>(
+        &mut self,
+        path: P,
+        password: &str,
+    ) -> Result<(), SessionError> {
         let path = path.as_ref();
-        
+
         if !path.exists() {
             return Err(SessionError::FileNotFound(path.display().to_string()));
         }
-        
+
         // Read file
         let mut file = File::open(path)?;
         let mut data = Vec::new();
         file.read_to_end(&mut data)?;
-        
+
         // Verify minimum length: magic(4) + version(1) + salt(16) + nonce(12) + tag(16)
         if data.len() < 49 {
             return Err(SessionError::InvalidFormat);
         }
-        
+
         // Check magic bytes
         if &data[0..4] != b"SPEC" {
             return Err(SessionError::InvalidFormat);
         }
-        
+
         // Check version
         if data[4] != 1 {
             return Err(SessionError::InvalidFormat);
         }
-        
+
         // Extract salt, nonce, and ciphertext
-        let salt: [u8; 16] = data[5..21].try_into()
+        let salt: [u8; 16] = data[5..21]
+            .try_into()
             .map_err(|_| SessionError::InvalidFormat)?;
-        let nonce_bytes: [u8; 12] = data[21..33].try_into()
+        let nonce_bytes: [u8; 12] = data[21..33]
+            .try_into()
             .map_err(|_| SessionError::InvalidFormat)?;
         let ciphertext = &data[33..];
-        
+
         // Derive key from password
         let key = Self::derive_key(password, &salt);
-        
+
         // Decrypt
         let cipher = ChaCha20Poly1305::new_from_slice(&key)
             .map_err(|e| SessionError::Encryption(e.to_string()))?;
         let nonce = Nonce::from_slice(&nonce_bytes);
-        
+
         let plaintext = cipher
             .decrypt(nonce, ciphertext)
             .map_err(|_| SessionError::Decryption)?;
-        
+
         // Parse JSON
-        let json = String::from_utf8(plaintext)
-            .map_err(|_| SessionError::Decryption)?;
+        let json = String::from_utf8(plaintext).map_err(|_| SessionError::Decryption)?;
         self.sessions = serde_json::from_str(&json)?;
-        
+
         self.cleanup_expired();
         Ok(())
     }
@@ -534,11 +541,15 @@ mod tests {
 
         // Save encrypted
         let password = "super_secret_password";
-        manager.save_encrypted(path, password).expect("Failed to save encrypted");
+        manager
+            .save_encrypted(path, password)
+            .expect("Failed to save encrypted");
 
         // Load into new manager
         let mut new_manager = SessionManager::new();
-        new_manager.load_encrypted(path, password).expect("Failed to load encrypted");
+        new_manager
+            .load_encrypted(path, password)
+            .expect("Failed to load encrypted");
 
         assert_eq!(new_manager.len(), 1);
         assert!(new_manager.get_session("test").is_some());
@@ -548,7 +559,7 @@ mod tests {
         let err = bad_manager.load_encrypted(path, "wrong_password");
         assert!(err.is_err());
         match err {
-            Err(SessionError::Decryption) | Err(SessionError::Encryption(_)) => {},
+            Err(SessionError::Decryption) | Err(SessionError::Encryption(_)) => {}
             _ => panic!("Expected Decryption error, got {:?}", err),
         }
     }

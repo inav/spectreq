@@ -1,6 +1,6 @@
+use crate::core::SpectreError;
 use brotli::Decompressor as BrotliDecompressor;
 use flate2::read::GzDecoder;
-use crate::core::SpectreError;
 use std::io::Read;
 
 /// Supported compression types

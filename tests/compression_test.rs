@@ -2,17 +2,35 @@
 //!
 //! Tests for Brotli, Gzip, Deflate, and Zstd decompression.
 
-use spectreq::CompressionType;
 use spectreq::client::compression::decompress;
+use spectreq::CompressionType;
 
 #[test]
 fn test_compression_type_from_encoding() {
-    assert_eq!(CompressionType::from_encoding("gzip"), Some(CompressionType::Gzip));
-    assert_eq!(CompressionType::from_encoding("br"), Some(CompressionType::Brotli));
-    assert_eq!(CompressionType::from_encoding("deflate"), Some(CompressionType::Deflate));
-    assert_eq!(CompressionType::from_encoding("zstd"), Some(CompressionType::Zstd));
-    assert_eq!(CompressionType::from_encoding("identity"), Some(CompressionType::None));
-    assert_eq!(CompressionType::from_encoding(""), Some(CompressionType::None));
+    assert_eq!(
+        CompressionType::from_encoding("gzip"),
+        Some(CompressionType::Gzip)
+    );
+    assert_eq!(
+        CompressionType::from_encoding("br"),
+        Some(CompressionType::Brotli)
+    );
+    assert_eq!(
+        CompressionType::from_encoding("deflate"),
+        Some(CompressionType::Deflate)
+    );
+    assert_eq!(
+        CompressionType::from_encoding("zstd"),
+        Some(CompressionType::Zstd)
+    );
+    assert_eq!(
+        CompressionType::from_encoding("identity"),
+        Some(CompressionType::None)
+    );
+    assert_eq!(
+        CompressionType::from_encoding(""),
+        Some(CompressionType::None)
+    );
     assert_eq!(CompressionType::from_encoding("unknown"), None);
 }
 
@@ -36,7 +54,7 @@ fn test_identity_passthrough() {
 #[test]
 fn test_empty_data_decompression() {
     let empty: Vec<u8> = vec![];
-    
+
     // Identity should handle empty data
     let result = decompress(&empty, CompressionType::None);
     assert!(result.is_ok());
