@@ -11,8 +11,8 @@ use spectreq::Profile;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use spectreq::client::RequestTiming;
 use crate::cookies::PyCookieJar;
+use spectreq::client::RequestTiming;
 
 /// Request timing metrics
 #[pyclass(name = "RequestTiming")]

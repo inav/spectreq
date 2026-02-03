@@ -47,11 +47,11 @@ impl PyCookieJar {
     fn set_cookies(&self, url: String, cookies: Vec<String>) -> PyResult<()> {
         let url = Url::parse(&url)
             .map_err(|e: url::ParseError| pyo3::exceptions::PyValueError::new_err(e.to_string()))?;
-        
+
         // Convert Vec<String> to Vec<&str> for the underlying API
         let refs: Vec<&str> = cookies.iter().map(|s| s.as_str()).collect();
         self.inner.set_cookies(&refs, &url);
-        
+
         Ok(())
     }
 
@@ -61,7 +61,7 @@ impl PyCookieJar {
     fn get_cookie_value(&self, url: String) -> PyResult<Option<String>> {
         let url = Url::parse(&url)
             .map_err(|e: url::ParseError| pyo3::exceptions::PyValueError::new_err(e.to_string()))?;
-            
+
         Ok(self.inner.get_cookie_value(&url))
     }
 
@@ -84,11 +84,11 @@ impl PyCookieJar {
     fn remove_for_domain(&self, domain: String) {
         self.inner.remove_for_domain(&domain);
     }
-    
+
     fn __len__(&self) -> usize {
         self.inner.len()
     }
-    
+
     fn __repr__(&self) -> String {
         format!("CookieJar(count={})", self.inner.len())
     }
