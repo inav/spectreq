@@ -107,6 +107,7 @@ impl PyResponse {
 
     /// Check if response was from cache
     #[getter]
+    #[allow(clippy::wrong_self_convention)]
     fn from_cache(&self) -> bool {
         self.from_cache
     }

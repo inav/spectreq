@@ -6,6 +6,7 @@
 
 pub mod auth;
 pub mod cache;
+#[allow(clippy::module_inception)]
 pub mod client;
 pub mod compression;
 pub mod connector;

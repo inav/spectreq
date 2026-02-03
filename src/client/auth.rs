@@ -280,6 +280,7 @@ impl DigestAuth {
     }
 
     /// Create the authorization header value for digest auth
+    #[allow(clippy::too_many_arguments)]
     pub fn authorization_header(
         &self,
         method: &str,

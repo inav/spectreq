@@ -429,10 +429,10 @@ async fn health_check(proxy_url: &str, timeout: Duration) -> bool {
 
     // Try to connect to the proxy
     let addr = format!("{}:{}", host, port);
-    match tokio::time::timeout(timeout, tokio::net::TcpStream::connect(&addr)).await {
-        Ok(Ok(_)) => true,
-        _ => false,
-    }
+    matches!(
+        tokio::time::timeout(timeout, tokio::net::TcpStream::connect(&addr)).await,
+        Ok(Ok(_))
+    )
 }
 
 #[cfg(test)]

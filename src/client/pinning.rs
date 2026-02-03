@@ -50,18 +50,12 @@ impl CertPinner {
     /// The `spki_hash` should be a hex-encoded SHA-256 hash of the
     /// DER-encoded Subject Public Key Info (SPKI) from the certificate.
     pub fn add_pin(&mut self, host: String, spki_hash: String) {
-        self.pins
-            .entry(host)
-            .or_insert_with(Vec::new)
-            .push(spki_hash);
+        self.pins.entry(host).or_default().push(spki_hash);
     }
 
     /// Add multiple pins for a host
     pub fn add_pins(&mut self, host: String, spki_hashes: Vec<String>) {
-        self.pins
-            .entry(host)
-            .or_insert_with(Vec::new)
-            .extend(spki_hashes);
+        self.pins.entry(host).or_default().extend(spki_hashes);
     }
 
     /// Remove all pins for a host

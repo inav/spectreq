@@ -379,7 +379,7 @@ impl Default for MetricsCollector {
 }
 
 /// Metrics percentiles
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct MetricsPercentiles {
     /// 50th percentile response time (median)
     pub p50_response_time_ms: u64,
@@ -397,21 +397,6 @@ pub struct MetricsPercentiles {
     pub p95_ttfb_us: u64,
     /// 99th percentile TTFB
     pub p99_ttfb_us: u64,
-}
-
-impl Default for MetricsPercentiles {
-    fn default() -> Self {
-        Self {
-            p50_response_time_ms: 0,
-            p90_response_time_ms: 0,
-            p95_response_time_ms: 0,
-            p99_response_time_ms: 0,
-            p50_ttfb_us: 0,
-            p90_ttfb_us: 0,
-            p95_ttfb_us: 0,
-            p99_ttfb_us: 0,
-        }
-    }
 }
 
 /// Calculate percentile from a sorted array
@@ -599,6 +584,7 @@ impl RequestTimer {
     }
 
     /// Build request metrics from the timer data
+    #[allow(clippy::too_many_arguments)]
     pub fn build_metrics(
         &self,
         method: &str,

@@ -13,7 +13,7 @@ use tokio_rustls::client::TlsStream;
 /// Connection wrapper for pooled connections
 #[derive(Debug)]
 pub enum PooledConnection {
-    Tls(TlsStream<TcpStream>),
+    Tls(Box<TlsStream<TcpStream>>),
     Plain(TcpStream),
 }
 
@@ -181,7 +181,7 @@ impl HostPool {
             let idle = now.duration_since(entry.last_used);
             let lifetime = now.duration_since(entry.created_at);
 
-            idle < config.idle_timeout && config.max_lifetime.map_or(true, |max| lifetime < max)
+            idle < config.idle_timeout && config.max_lifetime.is_none_or(|max| lifetime < max)
         });
     }
 
@@ -229,7 +229,7 @@ impl ConnectionPool {
         if let Some(conn) = pool.get_idle_connection(&self.config) {
             // Update last used time
             for entry in &mut pool.connections {
-                if let Some(_) = entry.connection.age() {
+                if entry.connection.age().is_some() {
                     entry.last_used = Instant::now();
                 }
             }

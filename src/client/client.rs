@@ -1262,9 +1262,7 @@ impl ClientBuilder {
     ///
     /// Returns an error if the profile is invalid.
     pub async fn build(self) -> Result<Client> {
-        let profile = self
-            .profile
-            .unwrap_or_else(|| Profile::chrome_120_windows());
+        let profile = self.profile.unwrap_or_else(Profile::chrome_120_windows);
         let mut client = Client::with_options(profile, self.proxy, self.headers).await?;
         // Set split proxy configuration
         client.tcp_proxy = self.tcp_proxy;

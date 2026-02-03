@@ -24,7 +24,7 @@ fn parse_proxy_url(url: &str) -> Option<(String, u16)> {
 /// Custom stream type that can be either a plain TCP stream or a TLS stream
 pub enum MaybeTlsStream {
     Plain(TcpStream),
-    Tls(tokio_rustls::client::TlsStream<TcpStream>),
+    Tls(Box<tokio_rustls::client::TlsStream<TcpStream>>),
 }
 
 impl AsyncRead for MaybeTlsStream {
@@ -82,7 +82,7 @@ impl ImpersonateConnection {
     }
 
     pub fn tls(stream: tokio_rustls::client::TlsStream<TcpStream>) -> Self {
-        Self::new(MaybeTlsStream::Tls(stream))
+        Self::new(MaybeTlsStream::Tls(Box::new(stream)))
     }
 }
 

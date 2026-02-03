@@ -148,6 +148,7 @@ impl PyDigestAuth {
 
     /// Generate the authorization header for a request
     #[pyo3(signature = (method, uri, realm, nonce, qop=None, opaque=None, nc=1))]
+    #[allow(clippy::too_many_arguments)]
     fn authorization_header(
         &self,
         method: &str,
