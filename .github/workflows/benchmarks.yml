@@ -38,14 +38,14 @@ jobs:
             ${{ runner.os }}-cargo-bench-
       
       - name: Run benchmarks
-        run: cargo bench --bench profile_bench --bench client_bench -- --noplot
+        run: cargo bench --bench profile_bench --bench client_bench -- --noplot | tee benchmark_output.txt
       
       - name: Store benchmark result
         uses: benchmark-action/github-action-benchmark@v1
         with:
           name: Rust Benchmarks
           tool: 'cargo'
-          output-file-path: target/criterion/*/new/estimates.json
+          output-file-path: benchmark_output.txt
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           alert-threshold: '150%'
