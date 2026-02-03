@@ -1,3 +1,9 @@
+[workspace]
+members = [
+    ".",
+    "spectreq-py",
+]
+
 [package]
 name = "spectreq"
 version = "0.1.1"
