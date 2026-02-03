@@ -16,6 +16,16 @@ jobs:
       - uses: actions/checkout@v4
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
+      - name: Build sdist
+        uses: PyO3/maturin-action@v1
+        with:
+          command: sdist
+          args: --out dist --manifest-path spectreq-py/Cargo.toml
+      - name: Upload sdist
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-sdist
+          path: dist
       - name: Publish to Crates.io
         run: cargo publish --token ${{ secrets.CRATES_IO_TOKEN }}
         continue-on-error: true # Might fail if version exists, just warn
@@ -42,7 +52,7 @@ jobs:
 
   publish-pypi:
     name: Publish to PyPI
-    needs: build-wheels
+    needs: [build-wheels, publish-crates-io]
     runs-on: ubuntu-latest
     permissions:
       id-token: write
