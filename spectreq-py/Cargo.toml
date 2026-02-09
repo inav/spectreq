@@ -16,7 +16,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 spectreq = { path = "..", default-features = false }
-pyo3 = { version = "0.27", features = ["extension-module", "abi3-py311"] }
+pyo3 = { version = "0.28", features = ["extension-module", "abi3-py311"] }
 pyo3-async-runtimes = { version = "0.27", features = ["tokio-runtime"] }
 tokio = { version = "1.49", features = ["rt-multi-thread", "macros"] }
 url = "2.5"
